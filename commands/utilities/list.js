@@ -9,6 +9,7 @@ exports.run = async(client, message, args) => {
         array.slice(i * 13, (i + 1) * 13)
         )
     }
+    const await_msg = await message.channel.send("取得中です...")
 
     const urlll = "https://mcservers.jp/api/v1/server/list"
     fetch(urlll, {
@@ -35,7 +36,8 @@ exports.run = async(client, message, args) => {
                     footer:{ text : "  Server Count : "+list1.servers.length } 
                 }
             }
-            console.log(pages)
+
+            await await_msg.delete()
 
             const awaitReactions = async (message, m, options, filter) => {
                 const { min, max, page, limit } = options;
