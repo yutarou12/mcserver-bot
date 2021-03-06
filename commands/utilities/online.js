@@ -4,11 +4,13 @@ exports.run = async(client, message, args) => {
     if(!message.guild) return;
     
     const slice = (array) => {
-        const length = Math.ceil(array.length / 20)
+        const length = Math.ceil(array.length / 15)
         return new Array(length).fill().map((_, i) =>
-        array.slice(i * 20, (i + 1) * 20)
+        array.slice(i * 15, (i + 1) * 15)
         )
     }
+
+    const await_msg = await message.channel.send("取得中です...")
 
     const urlll = "https://mcservers.jp/api/v1/server/list/online"
     fetch(urlll, {
@@ -22,79 +24,21 @@ exports.run = async(client, message, args) => {
                 listt.push("/\\ "+n.name + " : " + n.id)
             })
 
-            if (list1.servers.length <= 20){
-                var maxx = 1
-            }else if (list1.servers.length > 20 && list1.servers.length <= 40){
-                var maxx = 2
-            }else if (list1.servers.length > 40 && list1.servers.length <= 60){
-                var maxx = 3
-            }else if (list1.servers.length > 60 && list1.servers.length <= 80){
-                var maxx = 4
-            }else if (list1.servers.length > 80 && list1.servers.length <= 100){
-                var maxx = 5 
-            }else if (list1.servers.length > 120 && list1.servers.length <= 140){
-                var maxx = 6
+            const max_size = Math.ceil(list1.servers.length / 15)
+
+            const options = { limit: 20 * 1000, min: 1, max: max_size, page: 1}
+            const pages = {}
+
+            for (let i = 0; i < max_size; i++) {
+                pages[i+1] = {
+                    title: "MCServer - Online List",
+                    description: (slice(listt)[i].toString().split(",").join("\n")),
+                    color: "26cc15",
+                    footer:{ text : "Server Count : "+list1.servers.length } 
+                }
             }
 
-            const options = { limit: 20 * 1000, min: 1, max: maxx, page: 1}
-            const pages = {
-                1: {
-                    title: "MCServer - Online List",
-                    description: (slice(listt)[0].toString().split(",").join("\n")),
-                    color: "26cc15",
-                    footer:{ text : "  Server Count : "+list1.servers.length } 
-                },
-                2: {
-                    title: "MCServer - Online List",
-                    description: (slice(listt)[1].toString().split(",").join("\n")),
-                    color: "26cc15",
-                    footer:{ text : "  Server Count : "+list1.servers.length } 
-                },
-                /*3: {
-                    title: "MCServer - Online List",
-                    description: (slice(listt)[2].toString().split(",").join("\n")),
-                    color: "26cc15",
-                    footer:{ text : "  Server Count : "+list1.servers.length } 
-                },
-                
-                4: {
-                    title: "MCServer - Online List",
-                    description: (slice(listt)[3].toString().split(",").join("\n")),
-                    color: "26cc15",
-                    footer:{ text : "  Server Count : "+list1.servers.length } 
-                },
-                5: {
-                    title: "MCServer - Online List",
-                    description: (slice(listt)[4].toString().split(",").join("\n")),
-                    color: "26cc15",
-                    footer:{ text : "  Server Count : "+list1.servers.length } 
-                },
-                6: {
-                    title: "MCServer - Online List",
-                    description: (slice(listt)[5].toString().split(",").join("\n")),
-                    color: "26cc15",
-                    footer:{ text : "  Server Count : "+list1.servers.length } 
-                },
-                7: {
-                    title: "MCServer - Online List",
-                    description: (slice(listt)[6].toString().split(",").join("\n")),
-                    color: "26cc15",
-                    footer:{ text : "  Server Count : "+list1.servers.length } 
-                },
-                8: {
-                    title: "MCServer - Online List",
-                    description: (slice(listt)[7].toString().split(",").join("\n")),
-                    color: "26cc15",
-                    footer:{ text : "  Server Count : "+list1.servers.length } 
-                },
-                9: {
-                    title: "MCServer - Online List",
-                    description: (slice(listt)[8].toString().split(",").join("\n")),
-                    color: "26cc15",
-                    footer:{ text : "  Server Count : "+list1.servers.length } 
-                },
-                */
-            }
+            await await_msg.delete()
 
             const awaitReactions = async (message, m, options, filter) => {
                 const { min, max, page, limit } = options;
@@ -105,14 +49,14 @@ exports.run = async(client, message, args) => {
                         await removeReaction(m, message, '⬅');
                         if (options.page != options.min) {
                             options.page = options.page - 1;
-                            await m.edit("```"+options.page+"ページ目/2ページ目```",{ embed: pages[options.page] });
+                            await m.edit(`\`\`\`\n${options.page}ページ目/${options.max}ページ目\n\`\`\``,{ embed: pages[options.page] });
                         }
                         awaitReactions(message, m, options, filter);
                     }else if (reaction.emoji.name === '➡') {
                         await removeReaction(m, message, '➡');
                         if (options.page != options.max) {
                             options.page = options.page + 1;
-                            await m.edit("```"+options.page+"ページ目/2ページ目```",{ embed: pages[options.page] });
+                            await m.edit(`\`\`\`\n${options.page}ページ目/${options.max}ページ目\n\`\`\``,{ embed: pages[options.page] });
                         }
                         awaitReactions(message, m, options, filter);
                     }else if (reaction.emoji.name === '🗑') {　
@@ -126,7 +70,7 @@ exports.run = async(client, message, args) => {
                 } catch(err) {}
             }
 
-            const m = await message.channel.send("```"+options.page+"ページ目/2ページ目```",{ embed: pages[options.page] });
+            const m = await message.channel.send(`\`\`\`\n${options.page}ページ目/${options.max}ページ目\n\`\`\``,{ embed: pages[options.page] });
             await m.react('⬅');
             await m.react('🗑');
             await m.react('➡');
