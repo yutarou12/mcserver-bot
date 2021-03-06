@@ -1,5 +1,5 @@
 const discord = require('discord.js');
-const client = new discord.Client();
+const client = new discord.Client({ws : { intents: Discord.Intents.ALL } });
 const token = require('./config.json').token
 const fs = require('fs');
 
