@@ -1,2 +1,1 @@
 # mcserver-bot
-テストコミット
